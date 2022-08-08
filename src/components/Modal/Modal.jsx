@@ -10,7 +10,7 @@ const Modal = ({ objectModal, toggleModal }) => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  });
   const handleCloseBackdrop = e => {
     if (e.target.nodeName !== 'DIV') return;
     toggleModal();
