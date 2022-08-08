@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import s from './App.module.css';
 import api from '../api/api';
+import s from './App.module.css';
 import Button from './Button/Button';
 import ImageGallery from './ImageGallery/ImageGallery';
 import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
