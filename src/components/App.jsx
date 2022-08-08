@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../api/api';
 import s from './App.module.css';
 import Button from './Button/Button';
@@ -8,90 +8,91 @@ import Modal from './Modal/Modal';
 import { Bars } from 'react-loader-spinner';
 import SerchBar from './Searchbar/SearchBar';
 
-export class App extends Component {
-  state = {
-    page: 1,
-    query: '',
-    totalHits: null,
-    data: [],
-    showModal: false,
-    objectModal: {},
-    loading: false,
+export const App = () => {
+  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState('');
+  const [data, setData] = useState([]);
+  const [totalHits, setTotalHits] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [objectModal, setObjectModal] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const firstStartRef = useRef(null);
+
+  useEffect(() => {
+    if (query === '') return;
+    setLoading(true);
+    const dataRequest = async () => {
+      try {
+        const data = await api(query, page);
+
+        setData(prev => [...prev, ...data.hits]);
+        setLoading(false);
+        setTotalHits(data.totalHits);
+      } catch (error) {
+        alert('error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    firstStartRef.current = document.body.clientHeight;
+    dataRequest();
+  }, [page, query]);
+
+  const onSubmit = queryA => {
+    if (query === queryA && page === 1) return;
+    setQuery(queryA);
+    setData([]);
+    setPage(1);
+    setTotalHits(null);
+    firstStartRef.current = null;
+  };
+  const toggleModal = () => {
+    // this.setState(({ showModal }) => ({
+    //   showModal: !showModal,
+    // }));
+    setShowModal(showModal => !showModal);
+  };
+  const dataModal = (src, alt) => {
+    // this.setState({ objectModal: { src, alt } });
+    // this.toggleModal();
+    toggleModal();
+    setObjectModal({ src, alt });
+  };
+  const btnLoad = () => {
+    setPage(prev => prev + 1);
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    const { query, page } = this.state;
+  const totalPage = Math.ceil(totalHits / 12);
+  return (
+    <div className={s.app}>
+      <SerchBar onSubmit={onSubmit} />
+      {data.length > 0 && (
+        <ImageGallery>
+          <ImageGalleryItem data={data} onModal={dataModal} />
+        </ImageGallery>
+      )}
 
-    if (prevState.query !== query || prevState.page !== page) {
-      this.setState({ loading: true });
-      this.dataRequest();
-    }
-  }
+      {loading === true && (
+        <div className={s.loader}>
+          <Bars
+            height="80"
+            width="80"
+            radius="9"
+            color="#3f51b5"
+            ariaLabel="three-dots-loading"
+            wrapperStyle
+            wrapperClass
+          />
+        </div>
+      )}
 
-  async dataRequest() {
-    const { page, query } = this.state;
-    try {
-      const data = await api(query, page);
-      this.setState(prevState => ({
-        data: [...prevState.data, ...data.hits],
-        totalHits: data.totalHits,
-        loading: false,
-      }));
-    } catch (error) {
-      alert('error');
-    } finally {
-      this.setState({ loading: false });
-    }
-  }
-  onSubmit = async query => {
-    if (this.state.query === query && this.state.page === 1) return;
-    this.setState({ query, data: [], page: 1, totalHits: null });
-  };
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-  };
-  dataModal = (src, alt) => {
-    this.setState({ objectModal: { src, alt } });
-    this.toggleModal();
-  };
-  btnLoad = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
-  render() {
-    const { data, showModal, objectModal, page, totalHits, loading } =
-      this.state;
-    const totalPage = Math.ceil(totalHits / 12);
-    return (
-      <div className={s.app}>
-        <SerchBar onSubmit={this.onSubmit} />
-        {data.length > 0 && (
-          <ImageGallery>
-            <ImageGalleryItem data={data} onModal={this.dataModal} />
-          </ImageGallery>
-        )}
+      {totalPage > page && <Button onClick={btnLoad} />}
 
-        {loading === true && (
-          <div className={s.loader}>
-            <Bars
-              height="80"
-              width="80"
-              radius="9"
-              color="#3f51b5"
-              ariaLabel="three-dots-loading"
-              wrapperStyle
-              wrapperClass
-            />
-          </div>
-        )}
-
-        {totalPage > page && <Button onClick={this.btnLoad} />}
-
-        {showModal && (
-          <Modal objectModal={objectModal} toggleModal={this.toggleModal} />
-        )}
-      </div>
-    );
-  }
-}
+      {showModal && (
+        <Modal objectModal={objectModal} toggleModal={toggleModal} />
+      )}
+    </div>
+  );
+};
