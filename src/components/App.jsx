@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../api/api';
 import s from './App.module.css';
 import Button from './Button/Button';
@@ -17,8 +17,6 @@ export const App = () => {
   const [objectModal, setObjectModal] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const firstStartRef = useRef(null);
-
   useEffect(() => {
     if (query === '') return;
     setLoading(true);
@@ -36,7 +34,6 @@ export const App = () => {
       }
     };
 
-    firstStartRef.current = document.body.clientHeight;
     dataRequest();
   }, [page, query]);
 
@@ -46,7 +43,6 @@ export const App = () => {
     setData([]);
     setPage(1);
     setTotalHits(null);
-    firstStartRef.current = null;
   };
   const toggleModal = () => {
     // this.setState(({ showModal }) => ({
