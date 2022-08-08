@@ -5,8 +5,8 @@ import Button from './Button/Button';
 import ImageGallery from './ImageGallery/ImageGallery';
 import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
 import Modal from './Modal/Modal';
-import SerchBar from './Searchbar/SearchBar';
 import { Bars } from 'react-loader-spinner';
+import SerchBar from './Searchbar/SearchBar';
 
 export class App extends Component {
   state = {
